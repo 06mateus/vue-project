@@ -1,4 +1,5 @@
 <script setup>
+// O ano atual (2026) dinâmico usando o JavaScript
 const anoAtual = new Date().getFullYear()
 </script>
 
@@ -32,11 +33,12 @@ const anoAtual = new Date().getFullYear()
   background-color: #111111; /* Fundo escuro elegante */
   color: #ffffff;
   padding: 50px 20px 20px 20px;
-  margin-top: auto; /* Empurra o rodapé para o fim da página caso tenha pouco conteúdo */
+  margin-top: auto; /* Empurra o rodapé para o fim da página se houver pouco conteúdo */
   box-sizing: border-box;
+  text-align: center; /* Centraliza o texto de todos os blocos por padrão */
 }
 
-/* Garante que se adapte se você usar tema claro no futuro */
+/* Suporte ao tema claro/escuro dinâmico do seu sistema */
 [data-theme="light"] .footer {
   background-color: #f1f1f1;
   color: #333333;
@@ -47,9 +49,16 @@ const anoAtual = new Date().getFullYear()
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr; /* Divide em 3 colunas de tamanhos proporcionais */
+  grid-template-columns: 1fr 1fr; /* 2 colunas iguais no PC */
   gap: 40px;
   padding-bottom: 30px;
+}
+
+.footer-bloco {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza os itens horizontalmente no bloco */
+  justify-content: center;
 }
 
 .footer-bloco h3, 
@@ -57,73 +66,7 @@ const anoAtual = new Date().getFullYear()
   margin-top: 0;
   margin-bottom: 18px;
   font-weight: 700;
+  width: 100%;
 }
 
-.footer-logo {
-  font-size: 1.3rem;
-  letter-spacing: 1px;
-  color: #007bff; /* Cor destaque */
-}
-
-.footer-bloco p {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: #aaaaaa;
-  margin: 5px 0;
-}
-[data-theme="light"] .footer-bloco p { color: #666666; }
-
-.footer-localizacao {
-  font-weight: 600;
-  margin-top: 15px !important;
-  color: #ffffff !important;
-}
-[data-theme="light"] .footer-localizacao { color: #333333 !important; }
-
-/* Links */
-.footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-links li {
-  margin-bottom: 10px;
-}
-
-.footer-links a {
-  color: #aaaaaa;
-  text-decoration: none;
-  font-size: 0.95rem;
-  transition: color 0.2s ease;
-}
-[data-theme="light"] .footer-links a { color: #666666; }
-
-.footer-links a:hover {
-  color: #007bff;
-}
-
-/* Direitos Autorais */
-.footer-inferior {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-top: 20px;
-  border-top: 1px solid #222222;
-  text-align: center;
-}
-[data-theme="light"] .footer-inferior { border-top-color: #e0e0e0; }
-
-.footer-inferior p {
-  font-size: 0.85rem;
-  color: #777777;
-  margin: 0;
-}
-
-/* Responsividade para Celular */
-@media (max-width: 768px) {
-  .footer-container {
-    grid-template-columns: 1fr; /* Vira uma única coluna */
-    gap: 30px;
-  }
-}
 </style>
