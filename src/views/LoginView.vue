@@ -14,7 +14,7 @@ const realizarLogin = () => {
     mensagemText.value = "Login realizado com sucesso! Redirecionando..."
     
     setTimeout(() => {
-      router.push('/') // Redireciona o usuário para a Home usando o Vue Router
+      router.push('/dashboard')
     }, 1500)
   } else {
     mensagemCor.value = "red"
