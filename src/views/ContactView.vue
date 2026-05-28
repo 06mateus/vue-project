@@ -21,7 +21,7 @@ const enviarFormulario = () => {
     mensagem: mensagem.value
   })
 
-  // Ativa a mensagem de sucesso na tela
+  // Ativa a mensagem de sucesso na tela    
   enviado.value = true
 
   // Limpa o formulário após o envio

@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { listaUsuarios } from '../database/usuarios.js' // 👈 Importa a lista global
 
 const router = useRouter()
 const email = ref('')
@@ -9,12 +10,13 @@ const mensagemText = ref('')
 const mensagemCor = ref('')
 
 const realizarLogin = () => {
-  if (email.value === "admin@teste.com" && senha.value === "1234") {
+  const usuarioEncontrado = listaUsuarios.value.find(u => u.email === email.value)
+  if (usuarioEncontrado && senha.value === "1234") {
     mensagemCor.value = "green"
     mensagemText.value = "Login realizado com sucesso! Redirecionando..."
     
     setTimeout(() => {
-      router.push('/') // Redireciona o usuário para a Home usando o Vue Router
+      router.push('/users') // Redireciona o usuário para a Home usando o Vue Router
     }, 1500)
   } else {
     mensagemCor.value = "red"

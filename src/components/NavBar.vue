@@ -58,6 +58,9 @@ onMounted(() => {
           <RouterLink to="/contact" @click="fecharMenu">Contato</RouterLink>
         </li>
         <li>
+          <RouterLink to="/users" @click="fecharMenu">Usuários</RouterLink>
+        </li>
+        <li>
           <button @click="alternarTema" class="btn-tema">
             {{ tema === 'dark' ? '☀️ Claro' : '🌙 Escuro' }}
           </button>
@@ -78,8 +81,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
-  background-color: #111111; /* Fundo escuro padrão */
+  /* padding: 15px 40px; */
+  background-color: #111111; /* Fundo escuro padrão */ 
   color: #ffffff;
   position: relative;
   z-index: 100;
@@ -176,6 +179,10 @@ onMounted(() => {
    ESTILOS RESPONSIVOS (CELULAR - MENOR QUE 768px)
    ========================================================================== */
 @media (max-width: 768px) {
+  .navbar {
+    padding: 15px 20px; /* Reduz o espaçamento lateral interno no celular */
+  }
+
   .menu-hamburger {
     display: flex; /* Exibe o ícone hambúrguer no celular */
   }
@@ -190,17 +197,19 @@ onMounted(() => {
     top: 70px;
     right: 0;
     width: 100%;
+    height: calc(100vh - 70px); /* Ocupa o restante da tela do celular se quiser preenchimento total */
     background-color: #111111;
     flex-direction: column;
-    padding: 30px 0;
-    gap: 25px;
+    justify-content: flex-start; /* Alinha os itens ao topo */
+    padding: 40px 0;
+    gap: 30px;
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
     
     /* Efeito suave de abrir escorregando para baixo */
     opacity: 0;
     transform: translateY(-15px);
     pointer-events: none;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
   [data-theme="light"] .nav-links {
@@ -217,19 +226,19 @@ onMounted(() => {
 
   .btn-menu-login {
     display: inline-block;
-    width: 80%;
+    width: 200px; /* Largura fixa ideal para o botão no celular */
     text-align: center;
   }
 
-  /* ANIMAÇÃO DO BOTÃO HAMBÚRGUER VIRANDO "X" */
+  /* ANIMAÇÃO DO BOTÃO HAMBÚRGUER VIRANDO "X" PERFECT */
   .menu-hamburger.animar .linha:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 4px);
+    transform: translateY(6px) rotate(45deg); /* Move para o centro e rotaciona */
   }
   .menu-hamburger.animar .linha:nth-child(2) {
-    opacity: 0;
+    opacity: 0; /* Esconde a linha do meio */
   }
   .menu-hamburger.animar .linha:nth-child(3) {
-    transform: rotate(-45deg) translate(6px, -5px);
+    transform: translateY(-6px) rotate(-45deg); /* Move para o centro e rotaciona ao contrário */
   }
 }
 </style>
