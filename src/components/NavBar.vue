@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue'
 
 const tema = ref('light')
-// Variável reativa para controlar a abertura do menu no celular
 const menuAberto = ref(false)
 
 const alternarTema = () => {
@@ -17,12 +16,10 @@ const alternarTema = () => {
   }
 }
 
-// Alterna o estado do menu hambúrguer
 const alternarMenu = () => {
   menuAberto.value = !menuAberto.value
 }
 
-// Fecha o menu lateral quando o usuário clica em algum link
 const fecharMenu = () => {
   menuAberto.value = false
 }
@@ -37,9 +34,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <header>
+  <header class="header-container">
     <nav class="navbar">
-      <div class="logo">Amanda Worma Arquitetura</div>
+      <div class="logo">
+        Amanda Worma <span class="logo-sub">Arquitetura</span>
+      </div>
       
       <button class="menu-hamburger" @click="alternarMenu" :class="{ 'animar': menuAberto }" aria-label="Menu">
         <span class="linha"></span>
@@ -48,24 +47,19 @@ onMounted(() => {
       </button>
 
       <ul class="nav-links" :class="{ 'menu-ativo': menuAberto }">
-        <li>
-          <RouterLink to="/home" @click="fecharMenu">Início</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/about" @click="fecharMenu">Sobre</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/contact" @click="fecharMenu">Contato</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/users" @click="fecharMenu">Usuários</RouterLink>
-        </li>
-        <li>
-          <button @click="alternarTema" class="btn-tema">
-            {{ tema === 'dark' ? '☀️ Claro' : '🌙 Escuro' }}
+        <li><RouterLink to="/home" @click="fecharMenu">Início</RouterLink></li>
+        <li><RouterLink to="/about" @click="fecharMenu">Sobre</RouterLink></li>
+        <li><RouterLink to="/contact" @click="fecharMenu">Contato</RouterLink></li>
+        <li><RouterLink to="/users" @click="fecharMenu">Usuários</RouterLink></li>
+        
+        <li class="item-tema">
+          <button @click="alternarTema" class="btn-tema" :aria-label="'Mudar para tema ' + (tema === 'dark' ? 'claro' : 'escuro')">
+            <span v-if="tema === 'dark'">☀️ <span class="txt-tema">Claro</span></span>
+            <span v-else>🌙 <span class="txt-tema">Escuro</span></span>
           </button>
         </li>
-        <li>
+        
+        <li class="item-login">
           <RouterLink to="/login" class="btn-menu-login" @click="fecharMenu">Login</RouterLink>
         </li>
       </ul>
@@ -77,102 +71,165 @@ onMounted(() => {
 /* ==========================================================================
    ESTILOS GERAIS DA NAVBAR (DESKTOP)
    ========================================================================== */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  /* padding: 15px 40px; */
-  background-color: #111111; /* Fundo escuro padrão */ 
-  color: #ffffff;
-  position: relative;
-  z-index: 100;
-  height: 70px;
-  box-sizing: border-box;
-  transition: background-color 0.3s ease, color 0.3s ease;
+.header-container {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background-color: #111111;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 /* Ajuste de cores para o Tema Claro */
-[data-theme="light"] .navbar {
+[data-theme="light"] .header-container {
   background-color: #ffffff;
-  color: #333333;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+}
+
+.navbar {
+  max-width: 1300px;
+  height: 80px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .logo {
-  font-size: 1.3rem;
+  font-family: 'Montserrat', 'Inter', sans-serif;
+  font-size: 1.25rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #ffffff;
+  transition: color 0.4s ease;
+}
+
+[data-theme="light"] .logo {
+  color: #1a1a1a;
+}
+
+.logo-sub {
+  font-weight: 300;
+  opacity: 0.8;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 32px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .nav-links a {
-  color: inherit;
+  color: #b3b3b3;
   text-decoration: none;
+  font-size: 0.95rem;
   font-weight: 500;
-  transition: color 0.2s ease;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+  position: relative;
+  padding: 6px 0;
+}
+
+/* Linha sutil no hover (efeito elegante) */
+.nav-links a:not(.btn-menu-login)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #007bff;
+  transition: width 0.3s ease;
+}
+
+.nav-links a:not(.btn-menu-login):hover::after {
+  width: 100%;
+}
+
+[data-theme="light"] .nav-links a {
+  color: #555555;
 }
 
 .nav-links a:hover {
   color: #007bff;
 }
 
-/* Botão de Alternar Tema limpo */
+[data-theme="light"] .nav-links a:hover {
+  color: #007bff;
+}
+
+/* Botão de Alternar Tema */
 .btn-tema {
   background: none;
   border: none;
-  color: inherit;
+  color: #b3b3b3;
   cursor: pointer;
-  font-size: 16px;
-  padding: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 6px 0;
   display: flex;
   align-items: center;
+  gap: 8px;
+  transition: color 0.3s ease;
 }
 
+[data-theme="light"] .btn-tema {
+  color: #555555;
+}
+
+.btn-tema:hover {
+  color: #007bff;
+}
+
+/* Botão de Login Estilizado */
 .btn-menu-login {
   background-color: #007bff;
   color: #ffffff !important;
-  padding: 8px 18px;
-  border-radius: 6px;
+  padding: 10px 24px;
+  border-radius: 50px; /* Botão pílula, mais moderno */
   font-weight: 600;
-  transition: background-color 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 .btn-menu-login:hover {
-  background-color: #0056b3;
+  background-color: #0069d9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 123, 255, 0.3);
 }
 
-/* Escondido no Computador */
+/* Menu Hamburger (Escondido no Desktop) */
 .menu-hamburger {
   display: none;
   flex-direction: column;
-  justify-content: space-around;
-  width: 24px;
+  justify-content: space-between;
+  width: 26px;
   height: 18px;
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 0;
-  z-index: 101;
+  z-index: 1001;
 }
 
 .menu-hamburger .linha {
-  width: 24px;
-  height: 3px;
+  width: 100%;
+  height: 2px; /* Linhas mais finas dão aspecto mais sofisticado */
   background-color: #ffffff;
-  border-radius: 10px;
-  transition: all 0.3s ease;
+  border-radius: 2px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, background-color 0.4s ease;
 }
 
 [data-theme="light"] .menu-hamburger .linha {
-  background-color: #333333;
+  background-color: #1a1a1a;
 }
 
 /* ==========================================================================
@@ -180,65 +237,86 @@ onMounted(() => {
    ========================================================================== */
 @media (max-width: 768px) {
   .navbar {
-    padding: 15px 20px; /* Reduz o espaçamento lateral interno no celular */
+    height: 70px;
+    padding: 0 24px;
   }
 
   .menu-hamburger {
-    display: flex; /* Exibe o ícone hambúrguer no celular */
+    display: flex;
   }
 
   .logo {
-    font-size: 1.1rem; /* Reduz levemente o tamanho do texto da logo */
+    font-size: 1.1rem;
   }
 
-  /* Transforma a lista de links horizontais em uma cortina vertical */
+  /* Menu responsivo em formato "Cortina Lateral/Abaixo" */
   .nav-links {
-    position: absolute;
-    top: 70px;
-    right: 0;
-    width: 100%;
-    height: calc(100vh - 70px); /* Ocupa o restante da tela do celular se quiser preenchimento total */
-    background-color: #111111;
+    position: fixed;
+    top: 0;
+    right: -100%; /* Joga para fora da tela na direita */
+    width: 280px; /* Largura lateral elegante, não ocupa a tela toda */
+    height: 100vh;
+    background-color: #151515;
     flex-direction: column;
-    justify-content: flex-start; /* Alinha os itens ao topo */
-    padding: 40px 0;
-    gap: 30px;
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-    
-    /* Efeito suave de abrir escorregando para baixo */
-    opacity: 0;
-    transform: translateY(-15px);
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    justify-content: flex-start;
+    align-items: flex-start; /* Alinha links à esquerda no mobile */
+    padding: 100px 40px 40px 40px;
+    gap: 24px;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   [data-theme="light"] .nav-links {
     background-color: #ffffff;
-    border-top: 1px solid #eee;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+    border-left: 1px solid #f0f0f0;
   }
 
-  /* Injetado pelo Vue quando menuAberto === true */
+  /* Quando o menu está ativo, ele desliza da direita */
   .nav-links.menu-ativo {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
+    right: 0;
+  }
+
+  .nav-links a, .btn-tema {
+    font-size: 1.1rem;
+    width: 100%;
+    display: block;
+  }
+  
+  .nav-links a:not(.btn-menu-login)::after {
+    display: none; /* Remove a linha do hover no mobile */
+  }
+
+  .item-tema, .item-login {
+    width: 100%;
+    margin-top: 10px;
   }
 
   .btn-menu-login {
-    display: inline-block;
-    width: 200px; /* Largura fixa ideal para o botão no celular */
+    display: block;
+    width: 100%;
     text-align: center;
+    box-sizing: border-box;
   }
 
-  /* ANIMAÇÃO DO BOTÃO HAMBÚRGUER VIRANDO "X" PERFECT */
+  /* Animação do Hamburger para "X" */
   .menu-hamburger.animar .linha:nth-child(1) {
-    transform: translateY(6px) rotate(45deg); /* Move para o centro e rotaciona */
+    transform: translateY(8px) rotate(45deg);
   }
   .menu-hamburger.animar .linha:nth-child(2) {
-    opacity: 0; /* Esconde a linha do meio */
+    opacity: 0;
+    transform: translateX(-10px);
   }
   .menu-hamburger.animar .linha:nth-child(3) {
-    transform: translateY(-6px) rotate(-45deg); /* Move para o centro e rotaciona ao contrário */
+    transform: translateY(-8px) rotate(-45deg);
+  }
+  
+  /* Garante que o ícone do "X" fique claro/escuro corretamente sobre o menu aberto */
+  .menu-hamburger.animar .linha {
+    background-color: #ffffff !important;
+  }
+  [data-theme="light"] .menu-hamburger.animar .linha {
+    background-color: #1a1a1a !important;
   }
 }
 </style>
