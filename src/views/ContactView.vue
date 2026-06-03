@@ -101,6 +101,7 @@ const enviarFormulario = () => {
 <style scoped>
 .contato-page {
   width: 100%;
+  box-sizing: border-box; /* Garante que o padding não estoure a largura de 100% */
   min-height: calc(100vh - 70px);
   background-color: var(--bg-sections, #f3f4f6);
   display: flex;
@@ -213,6 +214,8 @@ const enviarFormulario = () => {
   background-color: #fff;
   color: #333;
   transition: all 0.2s ease;
+  width: 100%; /* Adicionado para garantir o alinhamento */
+  box-sizing: border-box; /* Adicionado para lidar corretamente com os paddings dos inputs */
 }
 
 [data-theme="dark"] .campo-grupo input,
@@ -258,6 +261,7 @@ const enviarFormulario = () => {
   cursor: pointer;
   transition: background-color 0.2s;
   margin-top: 10px;
+  width: 100%; /* Garante que o botão ocupe todo o espaço disponível */
 }
 
 .btn-enviar:hover {
@@ -266,8 +270,13 @@ const enviarFormulario = () => {
 
 /* RESPONSIVIDADE */
 @media (max-width: 768px) {
+  .contato-page {
+    padding: 20px 15px; /* Reduz o espaçamento nas laterais */
+  }
+
   .contato-container {
-    grid-template-columns: 1fr;
+    padding: 60px 20px;
+    grid-template-columns: 1fr; /* Coloca o texto em cima e o form embaixo */
     gap: 30px;
   }
 
@@ -276,7 +285,11 @@ const enviarFormulario = () => {
   }
 
   .contato-card {
-    padding: 25px;
+    padding: 25px; /* Reduz o padding interno do card do formulário */
+  }
+
+  .localidade-grid {
+    grid-template-columns: 1fr; /* Coloca a Cidade em cima do Estado para não espremer os inputs */
   }
 }
 </style>
