@@ -51,6 +51,7 @@ onMounted(() => {
         <li><RouterLink to="/about" @click="fecharMenu">Sobre</RouterLink></li>
         <li><RouterLink to="/contact" @click="fecharMenu">Contato</RouterLink></li>
         <li><RouterLink to="/users" @click="fecharMenu">Usuários</RouterLink></li>
+        <li><RouterLink to="/configs" @click="fecharMenu">Configurações</RouterLink></li>
         
         <li class="item-tema">
           <button @click="alternarTema" class="btn-tema" :aria-label="'Mudar para tema ' + (tema === 'dark' ? 'claro' : 'escuro')">
