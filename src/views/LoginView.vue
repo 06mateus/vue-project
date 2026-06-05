@@ -1,9 +1,13 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, inject } from 'vue' // 👈 Precisamos importar o 'inject'
 import { useRouter } from 'vue-router'
-import { listaUsuarios } from '../database/usuarios.js' // 👈 Importa a lista global
+import { listaUsuarios } from '../database/usuarios.js'
 
 const router = useRouter()
+
+// 1. Puxamos a função que o App.vue preparou
+const setLoginState = inject('setLoginState') 
+
 const email = ref('')
 const senha = ref('')
 const mensagemText = ref('')
@@ -11,13 +15,23 @@ const mensagemCor = ref('')
 
 const realizarLogin = () => {
   const usuarioEncontrado = listaUsuarios.value.find(u => u.email === email.value)
+  
   if (usuarioEncontrado && senha.value === "1234") {
     mensagemCor.value = "green"
     mensagemText.value = "Login realizado com sucesso! Redirecionando..."
     
+    // 2. DISPARAMOS A FUNÇÃO PARA MUDAR O LAYOUT
+    if (setLoginState) {
+      console.log("✅ Função setLoginState encontrada! Alterando para true...")
+      setLoginState(true) // Isso esconde a NavBar e mostra a SideBar!
+    } else {
+      console.error("❌ ERRO: A função setLoginState não chegou aqui no Login.vue!")
+    }
+    
     setTimeout(() => {
-      router.push('/users') // Redireciona o usuário para a Home usando o Vue Router
+      router.push('/users') 
     }, 1500)
+
   } else {
     mensagemCor.value = "red"
     mensagemText.value = "E-mail ou senha incorretos. Tente novamente."
