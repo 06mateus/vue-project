@@ -1,6 +1,8 @@
 <script setup>
 import { defineEmits } from 'vue'
 import { useRouter } from 'vue-router'
+import { configuracoesGlobais } from '@/store/configuracoes'
+
 
 // Definimos os eventos que este componente pode enviar para o App.vue pai
 const emit = defineEmits(['fechar', 'logout'])
@@ -19,14 +21,14 @@ const fazerLogout = () => {
   emit('logout')
   
   // Redireciona o usuário para a página de login/inicial
-  router.push('/')
+  router.push('/home')
 }
 </script>
 
 <template>
   <aside class="sidebar">
     <div class="sidebar-header">
-      <h2>Meu Painel</h2>
+      <h2>{{ configuracoesGlobais.nomeEmpresa }}</h2>
       <button class="btn-fechar-mobile" @click="fecharMenu">✖</button>
     </div>
 
@@ -39,7 +41,10 @@ const fazerLogout = () => {
           <RouterLink to="/relatorios" @click="fecharMenu">Relatórios</RouterLink>
         </li>
         <li>
-          <RouterLink to="/perfil" @click="fecharMenu">Meu Perfil</RouterLink>
+          <RouterLink to="/configs" @click="fecharMenu">Configurações</RouterLink>
+        </li>
+        <li>
+          <RouterLink to="/users" @click="fecharMenu">Usuários</RouterLink>
         </li>
       </ul>
     </nav>
