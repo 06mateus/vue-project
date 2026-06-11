@@ -15,7 +15,7 @@ const menuItems = [
   { label: 'Dashboard', to: '/dashboard', icon: '📊' },
   { 
     label: 'Telas', 
-    id: 'configs', // ID único para controle de abertura
+    id: 'screens', // ID único para controle de abertura
     icon: '',
     children: [
       { label: 'Geral', to: '/config/gerais' },
