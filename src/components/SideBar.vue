@@ -1,106 +1,177 @@
 <script setup>
-import { defineEmits } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { configuracoesGlobais } from '@/store/configuracoes'
 
-
-// Definimos os eventos que este componente pode enviar para o App.vue pai
-const emit = defineEmits(['fechar', 'logout'])
 const router = useRouter()
+const emit = defineEmits(['fechar', 'logout'])
 
-// Função para fechar o menu lateral (muito útil para a versão mobile)
+// --- ESTADO & DADOS ---
+// Array para guardar os IDs dos menus que estão expandidos/abertos
+const menusAbertos = ref([])
+
+// Estrutura de dados atualizada suportando 'children' (submenus)
+const menuItems = [
+  { label: 'Dashboard', to: '/dashboard', icon: '📊' },
+  { 
+    label: 'Telas', 
+    id: 'configs', // ID único para controle de abertura
+    icon: '',
+    children: [
+      { label: 'Geral', to: '/config/gerais' },
+      { label: 'Usuários', to: '/config/usuario' },
+    ]
+  },
+  { label: 'Relatórios', to: '/relatorios', icon: '📈' },
+  { 
+    label: 'Configurações', 
+    id: 'configs', // ID único para controle de abertura
+    icon: '⚙️',
+    children: [
+      { label: 'Geral', to: '/config/gerais' },
+      { label: 'Usuários', to: '/config/usuario' },
+    ]
+  }
+]
+
+// --- MÉTODOS ---
 const fecharMenu = () => {
   emit('fechar')
 }
 
-// Lógica simulada de logout
+// Alterna entre abrir e fechar o submenu
+const toggleMenu = (id) => {
+  const index = menusAbertos.value.indexOf(id)
+  if (index === -1) {
+    menusAbertos.value.push(id) // Abre
+  } else {
+    menusAbertos.value.splice(index, 1) // Fecha
+  }
+}
+
 const fazerLogout = () => {
-  // Em um sistema real, você limparia o localStorage, token e o store (Pinia/Vuex) aqui.
-  
-  // Emite o evento de logout para o App.vue mudar o layout
   emit('logout')
-  
-  // Redireciona o usuário para a página de login/inicial
   router.push('/home')
 }
 </script>
 
 <template>
   <aside class="sidebar">
-    <div class="sidebar-header">
-      <h2>{{ configuracoesGlobais.nomeEmpresa }}</h2>
-      <button class="btn-fechar-mobile" @click="fecharMenu">✖</button>
-    </div>
+    
+    <!-- Cabeçalho -->
+    <header class="sidebar-header">
+      <h2 class="brand-title">{{ configuracoesGlobais.nomeEmpresa || 'App Vue' }}</h2>
+      <button class="btn-fechar-mobile" @click="fecharMenu" aria-label="Fechar menu">
+        ✖
+      </button>
+    </header>
 
+    <!-- Navegação -->
     <nav class="sidebar-nav">
       <ul>
-        <li>
-          <RouterLink to="/dashboard" @click="fecharMenu">Dashboard</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/relatorios" @click="fecharMenu">Relatórios</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/configs" @click="fecharMenu">Configurações</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/users" @click="fecharMenu">Usuários</RouterLink>
+        <li v-for="item in menuItems" :key="item.label">
+          
+          <!-- Se o item NÃO tiver filhos (Link normal) -->
+          <RouterLink v-if="!item.children" :to="item.to" @click="fecharMenu" class="nav-link">
+            <span class="icon">{{ item.icon }}</span>
+            <span class="label">{{ item.label }}</span>
+          </RouterLink>
+
+          <!-- Se o item TIVER filhos (Menu Sanfona) -->
+          <div v-else class="menu-group">
+            <button 
+              class="nav-link btn-toggle" 
+              :class="{ 'ativo': menusAbertos.includes(item.id) }"
+              @click="toggleMenu(item.id)"
+            >
+              <div class="toggle-content">
+                <span class="icon">{{ item.icon }}</span>
+                <span class="label">{{ item.label }}</span>
+              </div>
+              <!-- Setinha que muda de direção -->
+              <span class="arrow" :class="{ 'aberta': menusAbertos.includes(item.id) }">
+                ▼
+              </span>
+            </button>
+
+            <!-- Lista do Submenu -->
+            <ul v-show="menusAbertos.includes(item.id)" class="submenu">
+              <li v-for="child in item.children" :key="child.to">
+                <RouterLink :to="child.to" @click="fecharMenu" class="sub-link">
+                  <span class="label">{{ child.label }}</span>
+                </RouterLink>
+              </li>
+            </ul>
+          </div>
+
         </li>
       </ul>
     </nav>
 
-    <div class="sidebar-footer">
+    <!-- Rodapé -->
+    <footer class="sidebar-footer">
       <button class="btn-logout" @click="fazerLogout">
-        Sair
+        <span class="icon">🚪</span> Sair
       </button>
-    </div>
+    </footer>
+
   </aside>
 </template>
 
 <style scoped>
-/* Estrutura Principal da Sidebar */
+/* --- VARIÁVEIS DE COR --- */
 .sidebar {
+  --bg-color: #1a252f;
+  --bg-header: #121a21;
+  --bg-hover: #2c3e50;
+  --bg-submenu: #151e27;
+  --text-main: #ffffff;
+  --text-muted: #bdc3c7;
+  --brand-color: #42b883;
+  --danger-color: #e74c3c;
+  --danger-hover: #c0392b;
+
   width: 260px;
-  background-color: #1a252f;
-  color: #ffffff;
+  background-color: var(--bg-color);
+  color: var(--text-main);
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Ocupa toda a altura da tela */
+  height: 100vh;
   position: sticky;
   top: 0;
   transition: transform 0.3s ease-in-out;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Cabeçalho do Menu */
+/* Cabeçalho */
 .sidebar-header {
   padding: 1.5rem;
-  background-color: #121a21;
+  background-color: var(--bg-header);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.sidebar-header h2 {
+.brand-title {
   margin: 0;
   font-size: 1.25rem;
-  color: #42b883; /* Cor verde do Vue como destaque */
+  color: var(--brand-color);
 }
 
 .btn-fechar-mobile {
   display: none;
   background: none;
   border: none;
-  color: white;
+  color: var(--text-main);
   font-size: 1.25rem;
   cursor: pointer;
 }
 
-/* Navegação e Links */
+/* Navegação Global */
 .sidebar-nav {
-  flex: 1; /* Faz a navegação crescer e empurrar o footer para baixo */
+  flex: 1;
   padding: 1.5rem 0;
-  overflow-y: auto; /* Adiciona scroll se houver muitos links */
+  overflow-y: auto;
 }
 
 .sidebar-nav ul {
@@ -109,63 +180,130 @@ const fazerLogout = () => {
   margin: 0;
 }
 
-.sidebar-nav li {
-  margin-bottom: 0.5rem;
-}
-
-.sidebar-nav a {
-  display: block;
-  padding: 0.75rem 1.5rem;
-  color: #bdc3c7;
+/* Links e Botões de Toggle */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.85rem 1.5rem;
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.sidebar-nav a:hover,
-.sidebar-nav a.router-link-active {
-  background-color: #2c3e50;
-  color: #ffffff;
-  border-left: 4px solid #42b883; /* Destaque no link ativo */
+.nav-link:hover,
+.nav-link.router-link-active {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  border-left: 4px solid var(--brand-color);
 }
 
-/* Rodapé do Menu (Botão Sair) */
+/* Ajustes Específicos do Botão Pai (Sanfona) */
+.btn-toggle {
+  background: none;
+  border: none;
+  border-left: 4px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  justify-content: space-between; /* Afasta o texto da setinha */
+}
+
+.btn-toggle.ativo {
+  color: var(--text-main);
+  /* Opcional: deixar o menu pai destacado quando aberto */
+  /* border-left: 4px solid var(--text-muted); */
+}
+
+.toggle-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.arrow {
+  font-size: 0.7rem;
+  transition: transform 0.3s ease;
+}
+
+.arrow.aberta {
+  transform: rotate(-180deg); /* Vira a setinha para cima */
+}
+
+/* Submenu */
+.submenu {
+  background-color: var(--bg-submenu);
+  padding: 0.5rem 0;
+}
+
+.sub-link {
+  display: block;
+  padding: 0.6rem 1.5rem 0.6rem 3.5rem; /* Indentação extra no padding-left */
+  color: #95a5a6;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.sub-link:hover,
+.sub-link.router-link-active {
+  color: var(--text-main);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid var(--brand-color);
+}
+
+.icon {
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; /* Fixa largura para os ícones ficarem alinhados */
+}
+
+/* Rodapé */
 .sidebar-footer {
   padding: 1.5rem;
-  border-top: 1px solid #2c3e50;
+  border-top: 1px solid var(--bg-hover);
 }
 
 .btn-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
   padding: 0.75rem;
-  background-color: #e74c3c;
-  color: white;
+  background-color: var(--danger-color);
+  color: var(--text-main);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .btn-logout:hover {
-  background-color: #c0392b;
+  background-color: var(--danger-hover);
 }
 
-/* --- RESPONSIVIDADE (MOBILE) --- */
+/* Responsividade Mobile */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
     z-index: 9999;
-    transform: translateX(-100%); /* Escondido por padrão na esquerda */
+    transform: translateX(-100%);
   }
 
-  /* Essa classe '.aberto' é injetada dinamicamente pelo App.vue */
   .sidebar.aberto {
     transform: translateX(0);
   }
 
   .btn-fechar-mobile {
-    display: block; /* Mostra o botão de 'X' no mobile */
+    display: block;
   }
 }
 </style>

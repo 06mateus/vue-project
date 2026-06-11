@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { listaUsuarios } from '../database/usuarios.js' // 👈 Importa a lista global
+import { listaUsuarios } from '../../database/usuarios.js' // 👈 Importa a lista global
 
 const usuarios = listaUsuarios // Lista de usuários
 // Variáveis de controle do Modal

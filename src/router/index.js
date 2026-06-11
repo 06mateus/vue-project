@@ -2,8 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import AboutView from '../views/AboutView.vue'
-import UsuariosView from '../views/UsuariosView.vue'
-import ConfiguracoesView from '@/views/ConfiguracoesView.vue'
+import UsuariosView from '../views/configs/UsuariosView.vue'
+import ConfigGeneralView from '../views/configs/ConfigGeneralView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,14 +29,14 @@ const router = createRouter({
       component: () => import('../views/ContactView.vue')
     },
     {
-      path: '/users',
+      path: '/config/usuario',
       name: 'users',
       component: UsuariosView,
     },
     {
-      path: '/configs',
-      name: 'configs',
-      component: ConfiguracoesView,
+      path: '/config/gerais',
+      name: 'general',
+      component: ConfigGeneralView,
     },
   ],
 })

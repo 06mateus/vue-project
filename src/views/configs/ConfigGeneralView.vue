@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { configuracoesGlobais } from '../store/configuracoes.js' // 👈 Importe o estado global
+import { configuracoesGlobais } from '../../store/configuracoes.js' // 👈 Importe o estado global
 
 const salvoComSucesso = ref(false)
 
@@ -40,7 +40,7 @@ onMounted(() => {
   <main class="conteudo-sistema">
     <div class="cabecalho-pagina">
       <div>
-        <h2>Configurações do Sistema</h2>
+        <h2>Configurações Gerais do Sistema</h2>
         <p class="subtitulo">Personalize a identidade visual e os dados da empresa.</p>
       </div>
     </div>
@@ -57,12 +57,12 @@ onMounted(() => {
           <h3 class="sessao-titulo">🏢 Dados da Empresa</h3>
           <div class="grid-inputs">
             <div class="input-group">
-              <label for="nomeEmpresa">Nome da Empresa</label>
+              <label for="nomeEmpresa">Nome</label>
               <input type="text" id="nomeEmpresa" v-model="configuracoesGlobais.nomeEmpresa" placeholder="Ex: Arquitetura & Design" required>
             </div>
 
             <div class="input-group">
-              <label for="emailContato">E-mail Principal</label>
+              <label for="emailContato">E-mail</label>
               <input type="email" id="emailContato" v-model="configuracoesGlobais.emailContato" placeholder="contato@empresa.com" required>
             </div>
             
