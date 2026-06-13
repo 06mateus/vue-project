@@ -3,9 +3,30 @@ import { ref, onMounted } from 'vue'
 import { configuracoesGlobais } from '../../store/configuracoes.js' // 👈 Estado global integrado
 
 const salvoComSucesso = ref(false)
+const carregando = ref(false)
+const mensagemErro = ref('')
 
-// Removida a função tratarEmail que estava quebrando a sincronia.
-// Apenas a máscara do telefone e as outras funções permanecem iguais.
+// Máscara de CNPJ em tempo real (XX.XXX.XXX/XXXX-XX)
+const aplicarMascaraCNPJ = (event) => {
+  let valor = event.target.value
+  valor = valor.replace(/\D/g, "") // Remove tudo que não é número
+  
+  if (valor.length > 14) valor = valor.slice(0, 14)
+
+  if (valor.length > 12) {
+    valor = valor.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})$/, "$1.$2.$3/$4-$5")
+  } else if (valor.length > 8) {
+    valor = valor.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4})$/, "$1.$2.$3/$4")
+  } else if (valor.length > 5) {
+    valor = valor.replace(/^(\d{2})(\d{3})(\d{0,3})$/, "$1.$2.$3")
+  } else if (valor.length > 2) {
+    valor = valor.replace(/^(\d{2})(\d{0,3})$/, "$1.$2")
+  }
+
+  configuracoesGlobais.cnpj = valor
+}
+
+// Máscara de Telefone em tempo real ((XX) XXXXX-XXXX)
 const aplicarMascaraTelefone = (event) => {
   let valor = event.target.value
   valor = valor.replace(/\D/g, "")
@@ -24,17 +45,10 @@ const aplicarMascaraTelefone = (event) => {
   configuracoesGlobais.telefoneContato = valor
 }
 
-// Sanitização simples para e-mail (remove espaços que usuários às vezes colam sem querer)
-const tratarEmail = (event) => {
-  configuracoesGlobais.emailContato = event.target.value.trim().toLowerCase()
-}
-
 // Função responsável por aplicar os estilos dinâmicos no root do HTML
 const atualizarEstilosGlobais = () => {
-  // Aplica a cor primária escolhida no CSS global
   document.documentElement.style.setProperty('--cor-primaria', configuracoesGlobais.corPrimaria)
   
-  // Sincroniza o atributo do tema para que Navbar e Footer mudem instantaneamente
   if (configuracoesGlobais.temaEscuro) {
     document.documentElement.setAttribute('data-theme', 'dark')
   } else {
@@ -42,17 +56,42 @@ const atualizarEstilosGlobais = () => {
   }
 }
 
-const salvarConfiguracoes = () => {
-  // O salvamento no localStorage já é disparado pelo watch dentro do configuracoes.js
-  console.log('Novas configurações globais distribuídas:', configuracoesGlobais)
+// Salva e despacha as alterações da empresa atual para o backend
+const salvarConfiguracoes = async () => {
+  carregando.value = true
+  mensagemErro.value = ''
+  salvoComSucesso.value = false
 
-  atualizarEstilosGlobais()
+  try {
+    // O backend identifica o ID da empresa automaticamente pelo Token JWT enviado nas requisições
+    const response = await fetch('http://localhost:3000/api/configuracoes', {
+      method: 'PUT', // ou POST, dependendo da sua rota de atualização
+      headers: {
+        'Content-Type': 'application/json',
+        // 'Authorization': `Bearer ${seuTokenJWT}` // Adicione se não estiver automatizado no fetch global
+      },
+      body: JSON.stringify(configuracoesGlobais)
+    })
 
-  // Feedback visual de sucesso temporário
-  salvoComSucesso.value = true
-  setTimeout(() => {
-    salvoComSucesso.value = false
-  }, 3000)
+    if (!response.ok) {
+      const dados = await response.json()
+      throw new Error(dados.mensagem || 'Falha ao sincronizar as configurações.')
+    }
+
+    // Sincroniza visualmente a tela
+    atualizarEstilosGlobais()
+
+    // Feedback visual temporário de sucesso
+    salvoComSucesso.value = true
+    setTimeout(() => {
+      salvoComSucesso.value = false
+    }, 3000)
+
+  } catch (error) {
+    mensagemErro.value = error.message || 'Erro ao conectar com o servidor.'
+  } finally {
+    carregando.value = false
+  }
 }
 
 // Inicializa a identidade visual assim que a tela abre
@@ -65,16 +104,21 @@ onMounted(() => {
   <main class="conteudo-sistema">
     <div class="cabecalho-pagina">
       <div>
-        <h2>Configurações Gerais do Sistema</h2>
-        <p class="subtitulo">Personalize a identidade visual e os dados da empresa em todo o sistema.</p>
+        <h2>Configurações Gerais da Empresa</h2>
+        <p class="subtitulo">Personalize a identidade visual e os dados da sua empresa em todo o ecossistema.</p>
       </div>
     </div>
 
     <div class="config-container">
       <div class="config-card">
         
+        <!-- Alertas de Feedback -->
         <div v-if="salvoComSucesso" class="alerta-sucesso">
           ✓ Configurações salvas e aplicadas em todo o sistema!
+        </div>
+
+        <div v-if="mensagemErro" class="alerta-erro">
+          ⚠️ {{ mensagemErro }}
         </div>
 
         <form @submit.prevent="salvarConfiguracoes" class="form-config">
@@ -82,8 +126,22 @@ onMounted(() => {
           <h3 class="sessao-titulo">🏢 Dados da Empresa</h3>
           <div class="grid-inputs">
             <div class="input-group">
-              <label for="nomeEmpresa">Nome da Empresa</label>
+              <label for="nomeEmpresa">Nome da Empresa / Razão Social</label>
               <input type="text" id="nomeEmpresa" v-model="configuracoesGlobais.nomeEmpresa" placeholder="Ex: Amanda Worma Arquitetura" required>
+            </div>
+
+            <div class="input-group">
+              <label for="cnpj">CNPJ</label>
+              <input 
+                type="text" 
+                id="cnpj" 
+                :value="configuracoesGlobais.cnpj"
+                @input="aplicarMascaraCNPJ"
+                placeholder="00.000.000/0000-00" 
+                pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}"
+                title="O formato deve ser XX.XXX.XXX/XXXX-XX"
+                required
+              >
             </div>
 
             <div class="input-group">
@@ -91,8 +149,7 @@ onMounted(() => {
               <input 
                 type="email" 
                 id="emailContato" 
-                :value="configuracoesGlobais.emailContato"
-                @input="tratarEmail"
+                v-model.trim="configuracoesGlobais.emailContato"
                 placeholder="contato@empresa.com" 
                 required
               >
@@ -136,7 +193,9 @@ onMounted(() => {
           </div>
 
           <div class="acoes-rodape">
-            <button type="submit" class="btn-salvar">Aplicar Configurações</button>
+            <button type="submit" class="btn-salvar" :disabled="carregando">
+              {{ carregando ? 'Salvando...' : 'Aplicar Configurações' }}
+            </button>
           </div>
 
         </form>
@@ -155,7 +214,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* O CSS permanece o mesmo fornecido originalmente */
 .conteudo-sistema {
   --bg-cards: #ffffff;
   --cor-texto-titulo: #111111;
@@ -387,6 +445,16 @@ onMounted(() => {
   text-align: center;
 }
 
+.alerta-erro {
+  background-color: #f8d7da;
+  color: #842029;
+  padding: 15px;
+  border-radius: 6px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
 .acoes-rodape {
   margin-top: 15px;
   display: flex;
@@ -416,8 +484,13 @@ onMounted(() => {
   transition: opacity 0.2s, background-color 0.3s ease;
 }
 
-.btn-salvar:hover, .btn-preview:hover {
+.btn-salvar:hover:not(:disabled), .btn-preview:hover {
   opacity: 0.85;
+}
+
+.btn-salvar:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
 @media (max-width: 900px) {

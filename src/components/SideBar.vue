@@ -28,8 +28,8 @@ const menuItems = [
     id: 'configs', // ID único para controle de abertura
     icon: '⚙️',
     children: [
-      { label: 'Geral', to: '/config/gerais' },
-      { label: 'Usuários', to: '/config/usuario' },
+      { label: 'Empresa', to: '/config/empresa' },
+      { label: 'Usuários', to: '/config/usuario' }
     ]
   }
 ]

@@ -3,7 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import AboutView from '../views/AboutView.vue'
 import UsuariosView from '../views/configs/UsuariosView.vue'
-import ConfigGeneralView from '../views/configs/ConfigGeneralView.vue'
+import ConfEnterprise from '../views/configs/ConfEnterprise.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,10 +34,10 @@ const router = createRouter({
       component: UsuariosView,
     },
     {
-      path: '/config/gerais',
-      name: 'general',
-      component: ConfigGeneralView,
-    },
+      path: '/config/empresa',
+      name: 'enterprise',
+      component: ConfEnterprise,
+    }
   ],
 })
 
