@@ -4,16 +4,15 @@ import { ref, onMounted } from 'vue'
 const tema = ref('light')
 const menuAberto = ref(false)
 
+// Aplica o tema no HTML e salva no localStorage
+const aplicarTema = (novoTema) => {
+  tema.value = novoTema
+  document.documentElement.setAttribute('data-theme', novoTema)
+  localStorage.setItem('tema', novoTema)
+}
+
 const alternarTema = () => {
-  if (tema.value === 'dark') {
-    tema.value = 'light'
-    document.documentElement.removeAttribute('data-theme')
-    localStorage.setItem('tema', 'light')
-  } else {
-    tema.value = 'dark'
-    document.documentElement.setAttribute('data-theme', 'dark')
-    localStorage.setItem('tema', 'dark')
-  }
+  aplicarTema(tema.value === 'dark' ? 'light' : 'dark')
 }
 
 const alternarMenu = () => {
@@ -26,10 +25,10 @@ const fecharMenu = () => {
 
 onMounted(() => {
   const salvo = localStorage.getItem('tema')
-  if (salvo === 'dark') {
-    tema.value = 'dark'
-    document.documentElement.setAttribute('data-theme', 'dark')
-  }
+  // Se tiver salvo, usa o salvo. Se não, checa a preferência do sistema operacional
+  const preferenciaSistema = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  
+  aplicarTema(salvo || preferenciaSistema)
 })
 </script>
 
@@ -40,7 +39,12 @@ onMounted(() => {
         Amanda Worma <span class="logo-sub">Arquitetura</span>
       </div>
       
-      <button class="menu-hamburger" @click="alternarMenu" :class="{ 'animar': menuAberto }" aria-label="Menu">
+      <button 
+        class="menu-hamburger" 
+        @click="alternarMenu" 
+        :class="{ 'animar': menuAberto }" 
+        aria-label="Menu"
+      >
         <span class="linha"></span>
         <span class="linha"></span>
         <span class="linha"></span>
@@ -50,13 +54,16 @@ onMounted(() => {
         <li><RouterLink to="/home" @click="fecharMenu">Início</RouterLink></li>
         <li><RouterLink to="/about" @click="fecharMenu">Sobre</RouterLink></li>
         <li><RouterLink to="/contact" @click="fecharMenu">Contato</RouterLink></li>
-        <li><RouterLink to="/users" @click="fecharMenu">Usuários</RouterLink></li>
-        <li><RouterLink to="/configs" @click="fecharMenu">Configurações</RouterLink></li>
         
         <li class="item-tema">
-          <button @click="alternarTema" class="btn-tema" :aria-label="'Mudar para tema ' + (tema === 'dark' ? 'claro' : 'escuro')">
-            <span v-if="tema === 'dark'">☀️ <span class="txt-tema">Claro</span></span>
-            <span v-else>🌙 <span class="txt-tema">Escuro</span></span>
+          <button 
+            @click="alternarTema" 
+            class="btn-tema" 
+            :aria-label="'Mudar para tema ' + (tema === 'dark' ? 'claro' : 'escuro')"
+          >
+            <!-- Trocado para ícones textuais mais limpos, combinando com arquitetura -->
+            <span>{{ tema === 'dark' ? '☀️' : '🌙' }}</span>
+            <span class="txt-tema">{{ tema === 'dark' ? 'Claro' : 'Escuro' }}</span>
           </button>
         </li>
         
@@ -70,7 +77,33 @@ onMounted(() => {
 
 <style scoped>
 /* ==========================================================================
-   ESTILOS GERAIS DA NAVBAR (DESKTOP)
+   VARIÁVEIS DE CORES (O segredo da manutenção simples)
+   ========================================================================== */
+.header-container {
+  /* Padrão: Modo Escuro */
+  --bg-header: #111111;
+  --bg-menu-mobile: #151515;
+  --sombra-header: rgba(0, 0, 0, 0.2);
+  --cor-texto-principal: #ffffff;
+  --cor-texto-secundario: #b3b3b3;
+  --cor-borda-mobile: transparent;
+  --cor-primaria: #007bff;
+  --cor-primaria-hover: #0069d9;
+}
+
+/* Quando o data-theme for light, alteramos APENAS as variáveis */
+:deep([data-theme="light"]), 
+:root[data-theme="light"] .header-container {
+  --bg-header: #ffffff;
+  --bg-menu-mobile: #ffffff;
+  --sombra-header: rgba(0, 0, 0, 0.05);
+  --cor-texto-principal: #1a1a1a;
+  --cor-texto-secundario: #555555;
+  --cor-borda-mobile: #f0f0f0;
+}
+
+/* ==========================================================================
+   ESTILOS GERAIS DA NAVBAR
    ========================================================================== */
 .header-container {
   width: 100%;
@@ -78,15 +111,9 @@ onMounted(() => {
   top: 0;
   left: 0;
   z-index: 1000;
-  background-color: #111111;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-/* Ajuste de cores para o Tema Claro */
-[data-theme="light"] .header-container {
-  background-color: #ffffff;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  background-color: var(--bg-header);
+  box-shadow: 0 4px 20px var(--sombra-header);
+  transition: background-color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
 }
 
 .navbar {
@@ -106,12 +133,8 @@ onMounted(() => {
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #ffffff;
+  color: var(--cor-texto-principal);
   transition: color 0.4s ease;
-}
-
-[data-theme="light"] .logo {
-  color: #1a1a1a;
 }
 
 .logo-sub {
@@ -129,7 +152,7 @@ onMounted(() => {
 }
 
 .nav-links a {
-  color: #b3b3b3;
+  color: var(--cor-texto-secundario);
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
@@ -139,7 +162,6 @@ onMounted(() => {
   padding: 6px 0;
 }
 
-/* Linha sutil no hover (efeito elegante) */
 .nav-links a:not(.btn-menu-login)::after {
   content: '';
   position: absolute;
@@ -147,7 +169,7 @@ onMounted(() => {
   left: 0;
   width: 0;
   height: 2px;
-  background-color: #007bff;
+  background-color: var(--cor-primaria);
   transition: width 0.3s ease;
 }
 
@@ -155,23 +177,16 @@ onMounted(() => {
   width: 100%;
 }
 
-[data-theme="light"] .nav-links a {
-  color: #555555;
-}
-
-.nav-links a:hover {
-  color: #007bff;
-}
-
-[data-theme="light"] .nav-links a:hover {
-  color: #007bff;
+.nav-links a:hover,
+.btn-tema:hover {
+  color: var(--cor-primaria);
 }
 
 /* Botão de Alternar Tema */
 .btn-tema {
   background: none;
   border: none;
-  color: #b3b3b3;
+  color: var(--cor-texto-secundario);
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 500;
@@ -182,32 +197,24 @@ onMounted(() => {
   transition: color 0.3s ease;
 }
 
-[data-theme="light"] .btn-tema {
-  color: #555555;
-}
-
-.btn-tema:hover {
-  color: #007bff;
-}
-
 /* Botão de Login Estilizado */
 .btn-menu-login {
-  background-color: #007bff;
+  background-color: var(--cor-primaria);
   color: #ffffff !important;
   padding: 10px 24px;
-  border-radius: 50px; /* Botão pílula, mais moderno */
+  border-radius: 50px;
   font-weight: 600;
   box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
   transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 .btn-menu-login:hover {
-  background-color: #0069d9;
+  background-color: var(--cor-primaria-hover);
   transform: translateY(-1px);
   box-shadow: 0 6px 14px rgba(0, 123, 255, 0.3);
 }
 
-/* Menu Hamburger (Escondido no Desktop) */
+/* Menu Hamburger */
 .menu-hamburger {
   display: none;
   flex-direction: column;
@@ -223,18 +230,14 @@ onMounted(() => {
 
 .menu-hamburger .linha {
   width: 100%;
-  height: 2px; /* Linhas mais finas dão aspecto mais sofisticado */
-  background-color: #ffffff;
+  height: 2px;
+  background-color: var(--cor-texto-principal);
   border-radius: 2px;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, background-color 0.4s ease;
 }
 
-[data-theme="light"] .menu-hamburger .linha {
-  background-color: #1a1a1a;
-}
-
 /* ==========================================================================
-   ESTILOS RESPONSIVOS (CELULAR - MENOR QUE 768px)
+   ESTILOS RESPONSIVOS (MOBILE)
    ========================================================================== */
 @media (max-width: 768px) {
   .navbar {
@@ -250,30 +253,23 @@ onMounted(() => {
     font-size: 1.1rem;
   }
 
-  /* Menu responsivo em formato "Cortina Lateral/Abaixo" */
   .nav-links {
     position: fixed;
     top: 0;
-    right: -100%; /* Joga para fora da tela na direita */
-    width: 280px; /* Largura lateral elegante, não ocupa a tela toda */
+    right: -100%;
+    width: 280px;
     height: 100vh;
-    background-color: #151515;
+    background-color: var(--bg-menu-mobile);
     flex-direction: column;
     justify-content: flex-start;
-    align-items: flex-start; /* Alinha links à esquerda no mobile */
+    align-items: flex-start;
     padding: 100px 40px 40px 40px;
     gap: 24px;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
-    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -10px 0 30px var(--sombra-header);
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease;
+    border-left: 1px solid var(--cor-borda-mobile);
   }
 
-  [data-theme="light"] .nav-links {
-    background-color: #ffffff;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
-    border-left: 1px solid #f0f0f0;
-  }
-
-  /* Quando o menu está ativo, ele desliza da direita */
   .nav-links.menu-ativo {
     right: 0;
   }
@@ -285,7 +281,7 @@ onMounted(() => {
   }
   
   .nav-links a:not(.btn-menu-login)::after {
-    display: none; /* Remove a linha do hover no mobile */
+    display: none;
   }
 
   .item-tema, .item-login {
@@ -310,14 +306,6 @@ onMounted(() => {
   }
   .menu-hamburger.animar .linha:nth-child(3) {
     transform: translateY(-8px) rotate(-45deg);
-  }
-  
-  /* Garante que o ícone do "X" fique claro/escuro corretamente sobre o menu aberto */
-  .menu-hamburger.animar .linha {
-    background-color: #ffffff !important;
-  }
-  [data-theme="light"] .menu-hamburger.animar .linha {
-    background-color: #1a1a1a !important;
   }
 }
 </style>
