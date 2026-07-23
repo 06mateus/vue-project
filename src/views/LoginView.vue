@@ -29,8 +29,8 @@ const realizarLogin = () => {
     }
     
     setTimeout(() => {
-      router.push('/users') 
-    }, 1500)
+      router.push('/dashboard') 
+    }, 0)
 
   } else {
     mensagemCor.value = "red"
